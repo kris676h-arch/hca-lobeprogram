@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>HCA Halvmaraton 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0d;
+    --surface: #1a1a16;
+    --surface2: #222219;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0ede6;
+    --muted: #7a7870;
+    --accent: #c8f07a;
+    --accent-dim: rgba(200,240,122,0.12);
+    --accent-text: #0f0f0d;
+    --taper: #f0b46a;
+    --taper-dim: rgba(240,180,106,0.12);
+    --race: #a78bfa;
+    --race-dim: rgba(167,139,250,0.12);
+    --done: rgba(200,240,122,0.08);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+  .hero {
+    padding: 28px 20px 20px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
+  }
+  .hero-title {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 300;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .hero-sub {
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .stat-box .label { color: var(--muted); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 3px; }
+  .stat-box .val { color: var(--text); font-size: 15px; font-weight: 500; }
+  .stat-box .val.accent { color: var(--accent); }
+  .progress-wrap { padding: 14px 20px 0; }
+  .progress-bar-bg { height: 3px; background: var(--surface2); border-radius: 2px; }
+  .progress-bar-fill { height: 3px; background: var(--accent); border-radius: 2px; transition: width 0.4s ease; }
+  .progress-label { display: flex; justify-content: space-between; color: var(--muted); font-size: 10px; margin-top: 5px; }
+
+  /* Phases */
+  .phase-group { margin: 20px 12px 0; }
+  .phase-label {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 8px;
+    margin-bottom: 8px;
+  }
+  .week-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .week-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .week-header:active { background: var(--surface2); }
+  .week-name { font-size: 12px; font-weight: 500; color: var(--text); }
+  .week-meta { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .week-right { display: flex; align-items: center; gap: 8px; }
+  .badge {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .badge-base { background: var(--accent-dim); color: var(--accent); }
+  .badge-build { background: rgba(251,191,36,0.12); color: #fbbf24; }
+  .badge-peak { background: rgba(251,113,133,0.12); color: #fb7185; }
+  .badge-taper { background: var(--taper-dim); color: var(--taper); }
+  .badge-race { background: var(--race-dim); color: var(--race); }
+  .chevron { color: var(--muted); font-size: 12px; transition: transform 0.2s; }
+  .chevron.open { transform: rotate(180deg); }
+  .week-progress-mini { height: 2px; background: var(--surface2); }
+  .week-progress-mini-fill { height: 2px; background: var(--accent); transition: width 0.3s; }
+  .week-body { display: none; border-top: 1px solid var(--border); }
+  .week-body.open { display: block; }
+  .day-row {
+    display: flex;
+    align-items: center;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+    gap: 12px;
+  }
+  .day-row:last-child { border-bottom: none; }
+  .day-row.done { background: var(--done); }
+  .day-row:active { background: var(--surface2); }
+  .check-circle {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .day-row.done .check-circle {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .check-circle svg { display: none; }
+  .day-row.done .check-circle svg { display: block; }
+  .day-info { flex: 1; min-width: 0; }
+  .day-name { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .day-desc { font-size: 12px; color: var(--text); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .day-row.done .day-desc { color: var(--muted); text-decoration: line-through; }
+  .day-km { font-size: 11px; color: var(--muted); flex-shrink: 0; }
+  .day-rest { color: var(--muted) !important; font-style: italic; }
+
+  /* Race week special */
+  .race-day .day-desc { color: var(--race) !important; }
+  .race-day .check-circle { border-color: var(--race); }
+  .race-day.done .check-circle { background: var(--race); border-color: var(--race); }
+
+  /* Bottom bar */
+  .bottom-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 10px 20px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .bottom-bar .tip { font-size: 10px; color: var(--muted); max-width: 200px; line-height: 1.4; }
+  .reset-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+  }
+  .reset-btn:active { background: var(--surface2); }
+
+  .confirm-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .confirm-overlay.show { display: flex; }
+  .confirm-sheet {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 16px 16px 0 0;
+    padding: 24px 20px 36px;
+    width: 100%;
+  }
+  .confirm-sheet p { color: var(--text); font-size: 14px; margin-bottom: 16px; line-height: 1.5; }
+  .confirm-btns { display: flex; gap: 10px; }
+  .confirm-btns button {
+    flex: 1; font-family: 'DM Mono', monospace; font-size: 12px;
+    padding: 12px; border-radius: 10px; cursor: pointer; border: none;
+  }
+  .btn-cancel { background: var(--surface2); color: var(--muted); }
+  .btn-confirm { background: #fb7185; color: #0f0f0d; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <p class="hero-sub">HCA Halvmaraton · 27. september 2026</p>
+  <h1 class="hero-title">Løb på <em>1:55</em></h1>
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="label">Mål pace</div>
+      <div class="val accent">5:27</div>
+    </div>
+    <div class="stat-box">
+      <div class="label">Fuldført</div>
+      <div class="val" id="done-count">0 / 0</div>
+    </div>
+    <div class="stat-box">
+      <div class="label">Dage til løb</div>
+      <div class="val" id="days-left">—</div>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="main-progress" style="width:0%"></div></div>
+    <div class="progress-label"><span id="prog-pct">0%</span><span>27. sep 2026</span></div>
+  </div>
+</div>
+
+<div id="program"></div>
+
+<div class="bottom-bar">
+  <div class="tip">Tryk på en dag for at markere den fuldført</div>
+  <button class="reset-btn" onclick="showReset()">Nulstil alt</button>
+</div>
+
+<div class="confirm-overlay" id="confirm">
+  <div class="confirm-sheet">
+    <p>Vil du nulstille al din fremgang? Det kan ikke fortrydes.</p>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="hideReset()">Annuller</button>
+      <button class="btn-confirm" onclick="doReset()">Nulstil</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PHASES = [
+  {
+    label: "Fase 1 — Basisopbygning",
+    badge: "badge-base", badgeText: "Base",
+    weeks: [
+      { label: "Uge 1 · 21–27 apr", sub: "Kom i gang · ca. 25 km",
+        days: [["Man","Hvile",""],["Tir","Rolig løbetur","6 km"],["Ons","Hvile eller gåtur",""],["Tor","Rolig løbetur","5 km"],["Fre","Hvile",""],["Lør","Rolig langtur","8 km"],["Søn","Aktiv hvile",""]] },
+      { label: "Uge 2 · 28 apr–4 maj", sub: "Opbyg vane · ca. 28 km",
+        days: [["Man","Hvile",""],["Tir","Rolig løbetur","7 km"],["Ons","Hvile eller yoga",""],["Tor","Fartleg 5×1 min hurtig/rolig","6 km"],["Fre","Hvile",""],["Lør","Langtur rolig","10 km"],["Søn","Aktiv hvile",""]] },
+      { label: "Uge 3 · 5–11 maj", sub: "Rutine · ca. 30 km",
+        days: [["Man","Hvile",""],["Tir","Rolig løbetur","7 km"],["Ons","Hvile",""],["Tor","Tempotur i 5:10 pace","6 km"],["Fre","Hvile",""],["Lør","Langtur","12 km"],["Søn","Aktiv hvile",""]] },
+      { label: "Uge 4 · 12–18 maj · HVILEUGE", sub: "Restitution · ca. 22 km",
+        days: [["Man","Hvile",""],["Tir","Let løbetur","5 km"],["Ons","Hvile",""],["Tor","Rolig løbetur","5 km"],["Fre","Hvile",""],["Lør","Let langtur","8 km"],["Søn","Hvile",""]] },
+    ]
+  },
+  {
+    label: "Fase 2 — Opbygning",
+    badge: "badge-build", badgeText: "Opbyg",
+    weeks: [
+      { label: "Uge 5 · 19–25 maj", sub: "Intro intervaller · ca. 33 km",
+        days: [["Man","Hvile",""],["Tir","Rolig løbetur","8 km"],["Ons","Hvile",""],["Tor","Intervaller: 4×800m i 4:50–5:00","7 km"],["Fre","Hvile",""],["Lør","Langtur","14 km"],["Søn","Aktiv hvile",""]] },
+      { label: "Uge 6 · 26 maj–1 jun", sub: "Øg langtur · ca. 36 km",
+        days: [["Man","Hvile",""],["Tir","Rolig løbetur","9 km"],["Ons","Hvile",""],["Tor","Tempotur: 3 km i måltempo 5:27","7 km"],["Fre","Hvile",""],["Lør","Langtur","15 km"],["Søn","Aktiv hvile",""]] },
+      { label: "Uge 7 · 2–8 jun", sub: "Hårdere uge · ca. 38 km",
+        days: [["Man","Hvile",""],["Tir","Rolig løbetur","9 km"],["Ons","Hvile",""],["Tor","Intervaller: 5×1 km i 5:05–5:15","8 km"],["Fre","Hvile",""],["Lør","Langtur","16 km"],["Søn","Aktiv hvile",""]] },
+      { label: "Uge 8 · 9–15 jun · HVILEUGE", sub: "Restitution · ca. 25 km",
+        days: [["Man","Hvile",""],["Tir","Let løbetur","6 km"],["Ons","Hvile",""],["Tor","Rolig løbetur","6 km"],["Fre","Hvile",""],["Lør","Let langtur","10 km"],["Søn","Hvile",""]] },
+    ]
+  },
+  {
+    label: "Fase 3 — Intensitet",
+    badge: "badge-peak", badgeText: "Peak",
+    weeks: [
+      { label: "Uge 9 · 16–22 jun", sub: "Tempo fokus · ca. 40 km",
+        days: [["Man","Hvile",""],["Tir","Rolig løbetur","10 km"],["Ons","Hvile",""],["Tor","Tempotur: 5 km i 5:20–5:27","8 km"],["Fre","Hvile",""],["Lør","Langtur","17 km"],["Søn","Aktiv hvile",""]] },
+      { label: "Uge 10 · 23–29 jun", sub: "Maks volumen · ca. 42 km",
+        days: [["Man","Hvile",""],["Tir","Rolig løbetur","10 km"],["Ons","Hvile",""],["Tor","Intervaller: 6×1 km race pace","9 km"],["Fre","Hvile",""],["Lør","Langtur — vigtig!","18 km"],["Søn","Aktiv hvile",""]] },
+      { label: "Uge 11 · 30 jun–6 jul", sub: "Stærk uge · ca. 42 km",
+        days: [["Man","Hvile",""],["Tir","Rolig løbetur","10 km"],["Ons","Hvile",""],["Tor","Tempotur: 6 km race pace","9 km"],["Fre","Hvile",""],["Lør","Langtur","18 km"],["Søn","Aktiv hvile",""]] },
+      { label: "Uge 12 · 7–13 jul · HVILEUGE", sub: "Restitution · ca. 27 km",
+        days: [["Man","Hvile",""],["Tir","Let løbetur","7 km"],["Ons","Hvile",""],["Tor","Rolig løbetur","6 km"],["Fre","Hvile",""],["Lør","Let langtur","10 km"],["Søn","Hvile",""]] },
+    ]
+  },
+  {
+    label: "Fase 4 — Topform",
+    badge: "badge-peak", badgeText: "Peak",
+    weeks: [
+      { label: "Uge 13 · 14–20 jul", sub: "Hård uge · ca. 44 km",
+        days: [["Man","Hvile",""],["Tir","Rolig løbetur","11 km"],["Ons","Hvile",""],["Tor","Intervaller: 3×2 km race pace","9 km"],["Fre","Hvile",""],["Lør","Langtur — maks!","19 km"],["Søn","Aktiv hvile",""]] },
+      { label: "Uge 14 · 21–27 jul", sub: "Vedligehold · ca. 40 km",
+        days: [["Man","Hvile",""],["Tir","Rolig løbetur","10 km"],["Ons","Hvile",""],["Tor","Tempotur: 8 km race pace","10 km"],["Fre","Hvile",""],["Lør","Langtur","17 km"],["Søn","Aktiv hvile",""]] },
+      { label: "Uge 15 · 28 jul–3 aug", sub: "Afsluttende peak · ca. 43 km",
+        days: [["Man","Hvile",""],["Tir","Rolig løbetur","10 km"],["Ons","Hvile",""],["Tor","Intervaller: 4×2 km race pace","10 km"],["Fre","Hvile",""],["Lør","Langtur 18–19 km rolig","18 km"],["Søn","Aktiv hvile",""]] },
+      { label: "Uge 16 · 4–10 aug · HVILEUGE", sub: "Restitution · ca. 27 km",
+        days: [["Man","Hvile",""],["Tir","Let løbetur","7 km"],["Ons","Hvile",""],["Tor","Rolig løbetur","7 km"],["Fre","Hvile",""],["Lør","Let langtur","10 km"],["Søn","Hvile",""]] },
+    ]
+  },
+  {
+    label: "Fase 5 — Nedtrapning (Taper)",
+    badge: "badge-taper", badgeText: "Taper",
+    weeks: [
+      { label: "Uge 17 · 11–17 aug", sub: "Første taper · ca. 35 km",
+        days: [["Man","Hvile",""],["Tir","Rolig løbetur","9 km"],["Ons","Hvile",""],["Tor","Tempotur: 5 km race pace","8 km"],["Fre","Hvile",""],["Lør","Langtur, rolig","14 km"],["Søn","Aktiv hvile",""]] },
+      { label: "Uge 18 · 18–24 aug", sub: "Reducer volumen · ca. 30 km",
+        days: [["Man","Hvile",""],["Tir","Rolig løbetur","8 km"],["Ons","Hvile",""],["Tor","Interval: 3×1 km race pace","7 km"],["Fre","Hvile",""],["Lør","Kortere langtur","12 km"],["Søn","Aktiv hvile",""]] },
+      { label: "Uge 19 · 25–31 aug", sub: "Let volumen · ca. 25 km",
+        days: [["Man","Hvile",""],["Tir","Rolig løbetur","7 km"],["Ons","Hvile",""],["Tor","Let tempotur: 4 km","6 km"],["Fre","Hvile",""],["Lør","Let langtur","10 km"],["Søn","Aktiv hvile",""]] },
+      { label: "Uge 20 · 1–7 sep", sub: "Taper · ca. 22 km",
+        days: [["Man","Hvile",""],["Tir","Rolig løbetur","6 km"],["Ons","Hvile",""],["Tor","3 km i race pace","5 km"],["Fre","Hvile",""],["Lør","Let langtur","8 km"],["Søn","Aktiv hvile",""]] },
+    ]
+  },
+  {
+    label: "Fase 6 — Raceuge",
+    badge: "badge-race", badgeText: "Race",
+    weeks: [
+      { label: "Uge 21 · 8–14 sep", sub: "Meget let uge · ca. 18 km",
+        days: [["Man","Hvile",""],["Tir","Let løbetur","5 km"],["Ons","Hvile",""],["Tor","Let løbetur + 4×100m strides","5 km"],["Fre","Hvile",""],["Lør","Meget let joggetur","5 km"],["Søn","Hvile",""]] },
+      { label: "Uge 22 · Raceuge · 15–27 sep", sub: "Spar kræfter!",
+        days: [["Man","Hvile",""],["Tir","Let løbetur","3 km"],["Ons","Hvile",""],["Tor","Let joggetur + 3 strides","3 km"],["Fre","Hvile — pak tasken",""],["Lør","Kort løbetur 15 min rolig","2 km"],["Søn","🏁 HCA Halvmaraton!","21,1 km"]] },
+    ]
+  }
+];
+
+const STORAGE_KEY = 'hca_done_v1';
+
+function getState() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) { return {}; }
+}
+function setState(s) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+}
+
+let state = getState();
+let totalDays = 0;
+
+function countTrainDays(days) {
+  return days.filter(d => d[1] !== 'Hvile' && d[1] !== 'Aktiv hvile').length;
+}
+
+function build() {
+  const container = document.getElementById('program');
+  container.innerHTML = '';
+  totalDays = 0;
+  let dayIndex = 0;
+
+  PHASES.forEach((phase, pi) => {
+    const group = document.createElement('div');
+    group.className = 'phase-group';
+
+    const lbl = document.createElement('div');
+    lbl.className = 'phase-label';
+    lbl.textContent = phase.label;
+    group.appendChild(lbl);
+
+    phase.weeks.forEach((week, wi) => {
+      const trainDays = countTrainDays(week.days);
+      totalDays += trainDays;
+
+      const card = document.createElement('div');
+      card.className = 'week-card';
+
+      // Count done for this week
+      const weekDoneKey = `p${pi}w${wi}`;
+      let weekDone = 0;
+      week.days.forEach((d, di) => {
+        if (d[1] !== 'Hvile' && d[1] !== 'Aktiv hvile') {
+          const key = `${weekDoneKey}d${di}`;
+          if (state[key]) weekDone++;
+        }
+      });
+
+      const pct = trainDays > 0 ? (weekDone / trainDays * 100) : 0;
+
+      card.innerHTML = `
+        <div class="week-header" onclick="toggleWeek('${weekDoneKey}')">
+          <div>
+            <div class="week-name">${week.label}</div>
+            <div class="week-meta">${week.sub} · ${weekDone}/${trainDays} dage</div>
+          </div>
+          <div class="week-right">
+            <span class="badge ${phase.badge}">${phase.badgeText}</span>
+            <span class="chevron" id="chev-${weekDoneKey}">▾</span>
+          </div>
+        </div>
+        <div class="week-progress-mini"><div class="week-progress-mini-fill" id="wbar-${weekDoneKey}" style="width:${pct}%"></div></div>
+        <div class="week-body" id="body-${weekDoneKey}"></div>
+      `;
+
+      const body = card.querySelector(`#body-${weekDoneKey}`);
+
+      week.days.forEach((d, di) => {
+        const [dayName, desc, km] = d;
+        const isRest = desc === 'Hvile' || desc === 'Aktiv hvile';
+        const key = `${weekDoneKey}d${di}`;
+        const done = state[key] || false;
+        const isRace = desc.includes('HCA Halvmaraton');
+
+        const row = document.createElement('div');
+        row.className = `day-row${done ? ' done' : ''}${isRace ? ' race-day' : ''}`;
+
+        if (!isRest) {
+          row.onclick = () => toggleDay(key, weekDoneKey, pi, wi, trainDays);
+        }
+
+        row.innerHTML = `
+          <div class="check-circle">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 6l3 3 5-5" stroke="${isRace ? 'var(--bg)' : 'var(--accent-text)'}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="day-info">
+            <div class="day-name">${dayName}</div>
+            <div class="day-desc${isRest ? ' day-rest' : ''}">${desc}</div>
+          </div>
+          <div class="day-km">${km}</div>
+        `;
+        body.appendChild(row);
+      });
+
+      group.appendChild(card);
+    });
+
+    container.appendChild(group);
+  });
+
+  updateStats();
+}
+
+function toggleWeek(key) {
+  const body = document.getElementById('body-' + key);
+  const chev = document.getElementById('chev-' + key);
+  const open = body.classList.toggle('open');
+  chev.classList.toggle('open', open);
+}
+
+function toggleDay(key, weekKey, pi, wi, trainDays) {
+  state[key] = !state[key];
+  setState(state);
+  build();
+  // Reopen the week
+  setTimeout(() => {
+    const body = document.getElementById('body-' + weekKey);
+    const chev = document.getElementById('chev-' + weekKey);
+    if (body && !body.classList.contains('open')) {
+      body.classList.add('open');
+      chev.classList.add('open');
+    }
+  }, 10);
+}
+
+function updateStats() {
+  const done = Object.values(state).filter(Boolean).length;
+  document.getElementById('done-count').textContent = done + ' / ' + totalDays;
+  const pct = totalDays > 0 ? Math.round(done / totalDays * 100) : 0;
+  document.getElementById('main-progress').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+
+  const race = new Date('2026-09-27');
+  const now = new Date();
+  const diff = Math.ceil((race - now) / (1000 * 60 * 60 * 24));
+  document.getElementById('days-left').textContent = diff > 0 ? diff : '🏁';
+}
+
+function showReset() { document.getElementById('confirm').classList.add('show'); }
+function hideReset() { document.getElementById('confirm').classList.remove('show'); }
+function doReset() {
+  state = {};
+  setState(state);
+  hideReset();
+  build();
+}
+
+build();
+</script>
+</body>
+</html>
