@@ -1,0 +1,43 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sheet {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 16px 16px 0 0;
+  padding: 24px 20px 40px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.sheet p {
+  color: var(--text);
+  font-size: 14px;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.btns {
+  display: flex;
+  gap: 10px;
+}
+
+.btns button {
+  flex: 1;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: none;
+}
+
+.cancel { background: var(--surface2); color: var(--muted); }
+.confirm { background: #fb7185; color: #0f0f0d; font-weight: 500; }
