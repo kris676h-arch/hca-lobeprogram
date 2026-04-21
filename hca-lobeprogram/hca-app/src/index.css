@@ -1,0 +1,32 @@
+:root {
+  --bg: #0f0f0d;
+  --surface: #1a1a16;
+  --surface2: #222219;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #f0ede6;
+  --muted: #7a7870;
+  --accent: #c8f07a;
+  --accent-dim: rgba(200,240,122,0.12);
+  --accent-text: #0f0f0d;
+  --build-color: #fbbf24;
+  --build-dim: rgba(251,191,36,0.12);
+  --peak-color: #fb7185;
+  --peak-dim: rgba(251,113,133,0.12);
+  --taper-color: #f0b46a;
+  --taper-dim: rgba(240,180,106,0.12);
+  --race-color: #a78bfa;
+  --race-dim: rgba(167,139,250,0.12);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  overscroll-behavior: none;
+}
+
+#root { max-width: 600px; margin: 0 auto; }

@@ -1,0 +1,72 @@
+.row {
+  display: flex;
+  align-items: center;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  gap: 12px;
+  transition: background 0.15s;
+}
+
+.row:last-child { border-bottom: none; }
+.row:active { background: var(--surface2); }
+.row.done { background: rgba(200,240,122,0.05); }
+
+.check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.done .check {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.checkRace { border-color: var(--race-color); }
+.raceDay.done .check {
+  background: var(--race-color);
+  border-color: var(--race-color);
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dayName {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.desc {
+  font-size: 12px;
+  color: var(--text);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.done .desc {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.rest { color: var(--muted) !important; font-style: italic; }
+
+.raceDay .desc { color: var(--race-color) !important; }
+
+.km {
+  font-size: 11px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
